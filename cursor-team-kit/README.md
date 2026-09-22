@@ -1,12 +1,16 @@
 # Cursor Team Kit plugin
 
-Internal-style workflows for CI, code review, shipping, and test reliability. The kit is designed to be plug and play without requiring third-party service integrations.
+Team workflows for CI, code review, shipping, and test reliability. Plug and play: no third-party service integrations to set up.
 
 ## Installation
+
+In Cursor:
 
 ```bash
 /add-plugin cursor-team-kit
 ```
+
+For other agents, copy `skills/` and `agents/` into the directories your agent loads.
 
 ## Components
 
@@ -38,9 +42,11 @@ Internal-style workflows for CI, code review, shipping, and test reliability. Th
 | Agent | Description |
 |:------|:------------|
 | `ci-watcher` | Monitor GitHub Actions runs and return concise pass/fail summaries |
-| `thermo-nuclear-code-quality-review` | Task subagent that runs the thermo-nuclear code quality rubric against a diff |
+| `thermo-nuclear-code-quality-review` | Subagent that runs the thermo-nuclear code quality rubric against a diff |
 
 ### Rules
+
+Cursor `.mdc` rule files. Other agents can read them as plain markdown.
 
 | Rule | Description |
 |:-----|:------------|

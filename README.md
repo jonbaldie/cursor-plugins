@@ -1,6 +1,6 @@
-# Cursor plugins
+# Agent plugins
 
-Official Cursor plugins for popular developer tools, frameworks, and SaaS products. Each plugin is a standalone directory at the repository root with its own `.cursor-plugin/plugin.json` manifest.
+Plugins that give coding agents skills, subagents, hooks, rules, and MCP connections. Each plugin is a standalone directory with its own `.cursor-plugin/plugin.json` manifest, the Cursor plugin format. Most skills are plain `SKILL.md` folders that any agent loading Agent Skills can use. `third_party/` connector READMEs give Cursor install steps, and some use MCP endpoints or OAuth callbacks hosted by Cursor.
 
 ## Plugins
 
@@ -90,7 +90,7 @@ Author values match each plugin’s `plugin.json` `author.name` (Cursor lists `p
 
 ## Repository structure
 
-This is a multi-plugin marketplace repository. The root `.cursor-plugin/marketplace.json` lists all plugins, and each plugin has its own manifest:
+The root `.cursor-plugin/marketplace.json` lists every plugin. Each plugin has its own manifest:
 
 ```
 plugins/
@@ -100,7 +100,7 @@ plugins/
 │   ├── .cursor-plugin/
 │   │   └── plugin.json        # Per-plugin manifest
 │   ├── skills/                # Agent skills (SKILL.md with frontmatter)
-│   ├── rules/                 # Cursor rules (.mdc files)
+│   ├── rules/                 # Rules (.mdc files, Cursor rule format)
 │   ├── mcp.json               # MCP server definitions
 │   ├── README.md
 │   ├── CHANGELOG.md

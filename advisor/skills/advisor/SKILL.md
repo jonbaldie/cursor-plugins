@@ -23,7 +23,7 @@ The text after `/advisor` selects the action.
 | Input | Action |
 | --- | --- |
 | `/advisor` | Enable for this conversation with the default advisor: the latest Grok at its highest reasoning effort. If a state file already exists, from this or another conversation, re-bind it here, keeping its `model` and `nudge` settings. |
-| `/advisor <model>` | Same, with the given model. Any model available to subagents works: `/advisor cursor-grok-4.6-xhigh-fast`, `/advisor composer-2.5`. |
+| `/advisor <model>` | Same, with the given model. Any model available to subagents works: `/advisor grok fast`, `/advisor composer`. |
 | `/advisor off` | Disable: delete `.cursor/advisor/`. |
 | `/advisor status` | Report model, consult count, and whether the end-of-turn nudge is on. Changes nothing. |
 | `/advisor ask <question>` | Consult now about the current work, regardless of checkpoint. |
@@ -33,7 +33,7 @@ If the message also contains a task (`/advisor, then refactor the cache layer`),
 
 ### Choosing the model
 
-The default is the latest Grok model at its highest reasoning effort, currently `cursor-grok-4.6-xhigh`. If a newer Grok or a higher effort tier appears in the subagent model list available to you, prefer it and say so.
+The default is the latest Grok model at its highest reasoning effort, currently Grok 4.6 (xhigh reasoning). If a newer Grok or a higher effort tier appears in the subagent model list available to you, prefer it and say so.
 
 For `/advisor <model>`, resolve the request against the subagent model slugs available to you:
 
@@ -41,7 +41,7 @@ For `/advisor <model>`, resolve the request against the subagent model slugs ava
 - A family or version name (`grok fast`, `composer`): that family's latest model at its highest reasoning tier.
 - No match: say so, name two or three close options, and keep the current model.
 
-If the Task tool rejects a slug, read the valid slugs from its error message, pick the closest one (same family, highest reasoning tier), save it to `state.json`, and tell the user in one line. Do not block the consult on the slug.
+If the subagent tool rejects a slug, read the valid slugs from its error message, pick the closest one (same family, highest reasoning tier), save it to `state.json`, and tell the user in one line. Do not block the consult on the slug.
 
 ## Enabling
 
@@ -51,7 +51,7 @@ If the Task tool rejects a slug, read the valid slugs from its error message, pi
    ```json
    {
      "enabled": true,
-     "model": "cursor-grok-4.6-xhigh",
+     "model": "<resolved model slug>",
      "nudge": true,
      "advisor_agent_id": null,
      "conversation_id": null,
@@ -91,12 +91,8 @@ Do not consult for routine steps, for things you can verify yourself (run the te
    - Your specific questions, the options you see, and your current leaning with reasons.
    - The `transcript_path` from `state.json` when set and the mode is on in this conversation, so the advisor can read the full conversation itself.
    - No secrets. Redact tokens, keys, and `.env` values.
-3. Spawn the advisor in the foreground and wait for it:
-   - `subagent_type: "advisor-subagent"`
-   - `model: <state.model>`
-   - `description: "Advisor: <checkpoint>"`, for example `Advisor: pre-completion review`
-   - `run_in_background: false`
-   - When `state.advisor_agent_id` is set, pass it as `resume` and omit `model`; the advisor keeps its model and the context of earlier consults, so the briefing can be a delta: what changed since last time plus the new questions. If the resume fails, spawn fresh.
+3. Spawn the `advisor-subagent` subagent on `state.model` in the foreground, describe it as `Advisor: <checkpoint>` (for example `Advisor: pre-completion review`), and wait for its answer:
+   - When `state.advisor_agent_id` is set, resume that subagent instead of spawning a new one, keeping its model; the advisor keeps the context of earlier consults, so the briefing can be a delta: what changed since last time plus the new questions. If the resume fails, spawn fresh.
    - Save the returned agent id to `advisor_agent_id` in `state.json`. Clear it when the model changes.
 4. Act on the verdict:
    - `proceed`: go.
@@ -119,5 +115,5 @@ When files changed since the last consult and a turn ends without one, the plugi
 - Never enable advisor mode unasked. "Get a second opinion on this" is a one-off consult, not a mode change.
 - The advisor is read-only. Never ask it to edit files or do the task.
 - Never loop on the advisor: at most one follow-up per checkpoint.
-- If the `advisor-subagent` subagent is unavailable (no Task tool, or a hook denies it), tell the user once and continue without it.
-- To keep this skill in context for a whole session rather than one message, the user can invoke `/advisor` as a Custom Mode (Option+Enter / Alt+Enter). The state file works either way.
+- If the `advisor-subagent` subagent is unavailable (no subagent tool, or a hook denies it), tell the user once and continue without it.
+- To keep this skill in context for a whole session rather than one message, the user can pin it as a session mode if their agent supports one. The state file works either way.

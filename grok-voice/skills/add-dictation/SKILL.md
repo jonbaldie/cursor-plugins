@@ -10,7 +10,7 @@ description: >-
 
 # Add Dictation
 
-Add Grok Speech to Text to an existing app: a mic button that dictates into the composer, live captions, or transcripts of recorded audio. Run on `/add-dictation`, typed **Dictate**, or clear “transcribe” intent. Cursor has no mic; wire the **app**, not the IDE.
+Add Grok Speech to Text to an existing app: a mic button that dictates into the composer, live captions, or transcripts of recorded audio. Run on `/add-dictation`, typed **Dictate**, or clear “transcribe” intent. The coding agent's editor has no mic; wire the **app**, not the editor.
 
 ## Docs
 

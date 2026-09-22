@@ -18,7 +18,7 @@ Use from `continual-learning` when transcript deltas may produce durable memory 
    - `## Learned User Preferences`
    - `## Learned Workspace Facts`
 2. Load the incremental index if present.
-3. Inspect only transcript files under `~/.cursor/projects/<workspace-slug>/agent-transcripts/` that are new or have newer mtimes than the index.
+3. Inspect only the active workspace's session transcripts, wherever your agent stores them, that are new or have newer mtimes than the index.
 4. Pull out only durable, reusable items:
    - recurring user preferences or corrections
    - stable workspace facts

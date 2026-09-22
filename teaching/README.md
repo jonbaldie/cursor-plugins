@@ -1,12 +1,16 @@
 # Teaching plugin
 
-Teaching workflows: skill mapping, practice plans, and feedback loops.
+Two skills for learning a skill deliberately: plan a path, then review progress and adjust.
 
 ## Installation
+
+In Cursor:
 
 ```bash
 /add-plugin teaching
 ```
+
+For other agents, copy `skills/` into the directory your agent loads.
 
 ## Components
 
