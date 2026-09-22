@@ -9,7 +9,7 @@ description: >-
 
 # Add Read Aloud
 
-Add Grok Text to Speech to an existing app: a speaker button on assistant replies, auto-speak, or narration of any text. Run on `/add-read-aloud`, typed **Read aloud**, or clear “speak this” / “TTS” intent. Cursor has no speaker; wire the **app**, not the IDE.
+Add Grok Text to Speech to an existing app: a speaker button on assistant replies, auto-speak, or narration of any text. Run on `/add-read-aloud`, typed **Read aloud**, or clear “speak this” / “TTS” intent. The coding agent's editor has no speaker; wire the **app**, not the editor.
 
 ## Docs
 

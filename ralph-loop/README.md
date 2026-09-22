@@ -1,10 +1,8 @@
 # Ralph Loop
 
-Ralph Loop runs Cursor in a self-referential loop, feeding the same prompt back after every turn until the task is complete. It implements the [Ralph Wiggum technique](https://ghuntley.com/ralph/) pioneered by Geoffrey Huntley.
+Ralph Loop feeds the agent the same prompt after every turn until the task is done or an iteration limit is hit. The agent sees its own previous edits in the working tree and git history and improves on them: the prompt stays fixed, the code changes. It implements Geoffrey Huntley's [Ralph Wiggum technique](https://ghuntley.com/ralph/).
 
-## How it works
-
-Two hooks drive the loop. An `afterAgentResponse` hook watches each response for a `<promise>` tag matching the completion phrase. A `stop` hook fires when Cursor finishes a turn. If the promise hasn't been detected and the iteration limit hasn't been reached, the stop hook sends the original prompt back as a `followup_message`, starting the next iteration. Cursor sees its own previous edits in the working tree and git history, iterates on them, and repeats. The prompt never changes. The code does.
+Use it for tasks with a verifiable finish line: tests passing, a migration complete, a feature built to spec. Keep tasks that need human judgment or have fuzzy goals out of the loop.
 
 ## Installation
 
@@ -16,24 +14,21 @@ Two hooks drive the loop. An `afterAgentResponse` hook watches each response for
 
 > Start a ralph loop: "Build a REST API for todos. CRUD operations, input validation, tests. Output COMPLETE when done." --completion-promise "COMPLETE" --max-iterations 50
 
-Cursor will implement the API, run tests, see failures, fix them, and repeat until all requirements are met.
+- `--completion-promise <text>`: the loop ends when a response contains `<promise><text></promise>`.
+- `--max-iterations <N>`: the loop ends after N iterations. Default: unlimited, so always set it.
 
-## Skills
+Other skills: **cancel-ralph** stops the loop by deleting its state; **ralph-loop-help** explains the technique.
 
-**ralph-loop** starts the loop. Provide a prompt and options:
+## How it works
 
-> Start a ralph loop: "Refactor the cache layer" --max-iterations 20 --completion-promise "DONE"
+Two hooks in the Cursor plugin hook format drive the loop, with state in `.cursor/ralph/`:
 
-- `--max-iterations <N>` stops after N iterations (default: unlimited)
-- `--completion-promise <text>` sets the phrase that signals completion
-
-**cancel-ralph** removes the state file and stops the loop.
-
-**ralph-loop-help** explains the technique and usage in detail.
+1. `afterAgentResponse` checks each response for the `<promise>` tag.
+2. `stop` fires at the end of each turn. If no promise was seen and the limit isn't reached, it sends the original prompt back as a `followup_message`.
 
 ## Writing good prompts
 
-Define explicit completion criteria. Vague goals like "make it good" give Cursor nothing to verify against.
+Give the agent explicit completion criteria it can check:
 
 ```markdown
 Build a REST API for todos.
@@ -45,11 +40,7 @@ When complete:
 - Output: <promise>COMPLETE</promise>
 ```
 
-Break large tasks into phases. Encourage self-correction by including test/fix cycles in the prompt. Always pass `--max-iterations` to prevent runaway loops.
-
-## When to use Ralph Loop
-
-Works well for tasks with clear, verifiable success criteria: getting tests to pass, completing a migration, building a feature from a spec. Not a good fit for tasks that need human judgment or have ambiguous goals.
+Break large tasks into phases, and include a test-and-fix cycle in the prompt.
 
 ## Learn more
 

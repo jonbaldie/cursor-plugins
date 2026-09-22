@@ -1,18 +1,6 @@
 # Continual Learning
 
-Automatically and incrementally keeps `AGENTS.md` up to date from transcript changes.
-
-The plugin combines:
-
-- A `stop` hook that decides when to trigger learning.
-- A `continual-learning` skill that orchestrates the learning flow.
-- An `agents-memory-updater` subagent that mines new or changed transcripts and updates `AGENTS.md`.
-
-It is designed to avoid noisy rewrites by:
-
-- Reading existing `AGENTS.md` first and updating matching bullets in place.
-- Processing only new or changed transcript files.
-- Writing plain bullet points only (no evidence/confidence metadata).
+Continual Learning keeps `AGENTS.md` up to date by mining your recent session transcripts for recurring corrections and durable workspace facts. It runs incrementally: only new or changed transcripts are read, and matching bullets are updated in place.
 
 ## Installation
 
@@ -22,49 +10,37 @@ It is designed to avoid noisy rewrites by:
 
 ## How it works
 
-On eligible `stop` events, the hook may emit a `followup_message` that asks the agent to run the `continual-learning` skill.
+1. A `stop` hook (Cursor plugin hook format, run with `bun`) counts completed turns. When the cadence below is met, it posts a `followup_message` asking the agent to run the `continual-learning` skill.
+2. The skill delegates everything to the `agents-memory-updater` subagent. It has `disable-model-invocation: true`, so it runs only from the hook or when you invoke it.
+3. The subagent reads `AGENTS.md`, mines transcripts that are new or newer than its index, and updates two sections: `## Learned User Preferences` and `## Learned Workspace Facts`. Each holds at most 12 plain bullets. If nothing qualifies, it replies `No high-signal memory updates.`
 
-The skill is marked `disable-model-invocation: true`, so it will not be auto-selected during normal model invocation. When it does run, it delegates the full memory update flow to `agents-memory-updater`.
+State files, relative to the project root:
 
-The hook keeps local runtime state in:
+- `.cursor/hooks/state/continual-learning.json`: hook cadence state.
+- `.cursor/hooks/state/continual-learning-index.json`: transcript index used by the subagent.
 
-- `.cursor/hooks/state/continual-learning.json` (cadence state)
+## Cadence
 
-The updater uses an incremental transcript index at:
+The hook triggers when all of these hold:
 
-- `.cursor/hooks/state/continual-learning-index.json`
+- at least 10 completed turns since the last run
+- at least 120 minutes since the last run
+- the transcript's mtime has advanced since the last run
 
-## Trigger cadence
+Trial mode is off by default. Set `CONTINUAL_LEARNING_TRIAL_MODE=1` to use 3 turns and 15 minutes for the first 24 hours, then fall back to the defaults.
 
-Default cadence:
+## Environment overrides
 
-- minimum 10 completed turns
-- minimum 120 minutes since the last run
-- transcript mtime must advance since the previous run
+| Variable | Default |
+| --- | --- |
+| `CONTINUAL_LEARNING_MIN_TURNS` | 10 |
+| `CONTINUAL_LEARNING_MIN_MINUTES` | 120 |
+| `CONTINUAL_LEARNING_TRIAL_MODE` | off |
+| `CONTINUAL_LEARNING_TRIAL_MIN_TURNS` | 3 |
+| `CONTINUAL_LEARNING_TRIAL_MIN_MINUTES` | 15 |
+| `CONTINUAL_LEARNING_TRIAL_DURATION_MINUTES` | 1440 |
 
-Trial mode defaults (enabled in this plugin hook config):
-
-- minimum 3 completed turns
-- minimum 15 minutes
-- automatically expires after 24 hours, then falls back to default cadence
-
-## Optional env overrides
-
-- `CONTINUAL_LEARNING_MIN_TURNS` (or legacy `CONTINUOUS_LEARNING_MIN_TURNS`)
-- `CONTINUAL_LEARNING_MIN_MINUTES` (or legacy `CONTINUOUS_LEARNING_MIN_MINUTES`)
-- `CONTINUAL_LEARNING_TRIAL_MODE` (or legacy `CONTINUOUS_LEARNING_TRIAL_MODE`)
-- `CONTINUAL_LEARNING_TRIAL_MIN_TURNS` (or legacy `CONTINUOUS_LEARNING_TRIAL_MIN_TURNS`)
-- `CONTINUAL_LEARNING_TRIAL_MIN_MINUTES` (or legacy `CONTINUOUS_LEARNING_TRIAL_MIN_MINUTES`)
-- `CONTINUAL_LEARNING_TRIAL_DURATION_MINUTES` (or legacy `CONTINUOUS_LEARNING_TRIAL_DURATION_MINUTES`)
-
-## Output format in AGENTS.md
-
-The memory updater writes only:
-
-- `## Learned User Preferences`
-- `## Learned Workspace Facts`
-
-Each item is a plain bullet point.
+Each also accepts the legacy `CONTINUOUS_LEARNING_*` name.
 
 ## License
 

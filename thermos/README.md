@@ -1,12 +1,16 @@
 # Thermos plugin
 
-Thermo-nuclear branch review for Cursor agents: deep correctness and security audits, harsh maintainability rubrics, and parallel subagent orchestration.
+Thermo-nuclear branch review: a deep correctness and security audit and a harsh maintainability audit, run as two parallel subagents and merged into one verdict.
 
 ## Installation
+
+In Cursor:
 
 ```bash
 /add-plugin thermos
 ```
+
+For other agents, copy `skills/` and `agents/` into the directories your agent loads.
 
 ## Architecture
 
@@ -48,22 +52,22 @@ flowchart TB
 
 | Agent | Description |
 |:------|:------------|
-| `thermo-nuclear-review-subagent` | Task subagent for deep review rubric (diff-scoped). |
-| `thermo-nuclear-code-quality-review-subagent` | Task subagent for code-quality rubric (diff-scoped). |
+| `thermo-nuclear-review-subagent` | Subagent for the deep review rubric (diff-scoped). |
+| `thermo-nuclear-code-quality-review-subagent` | Subagent for the code-quality rubric (diff-scoped). |
 
 ## Typical usage
 
 **Double review (thermos):**
 
 1. Gather `git diff main...HEAD` and full contents of changed files.
-2. Invoke both subagents in one message with `run_in_background: true`.
+2. Run both subagents at once, in the background.
 3. Synthesize prioritized, deduped findings.
 
 **Single skill:** invoke `thermo-nuclear-review` or `thermo-nuclear-code-quality-review` in the main agent, or the matching subagent after gathering diff context.
 
 ## Migration from cursor-team-kit
 
-`cursor-team-kit` previously included only `thermo-nuclear-code-quality-review`. That skill and agent now live in **Thermos** alongside deep review and `thermos`. Remove the old thermo entries from team-kit when you install this plugin to avoid duplicates.
+`cursor-team-kit` also ships a `thermo-nuclear-code-quality-review` skill and agent. With both plugins installed, the skill name clashes; keep the Thermos copies and remove the team-kit ones.
 
 ## License
 
