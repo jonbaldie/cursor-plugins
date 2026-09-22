@@ -59,7 +59,7 @@ Capture this as seed context (file paths, symbols, commits, PR numbers, linked t
 
 ### Discovery
 
-Before spawning investigators, list the available MCPs from the Cursor environment. Use the available-tools map when present. Otherwise inspect the `mcps/` directory Cursor exposes for enabled MCP servers.
+Before spawning investigators, list the MCP servers and tools available in your agent's environment.
 
 Map each available MCP to one evidence category:
 
@@ -77,10 +77,12 @@ Aim for a complete **coverage map**, not a minimal one. Document the null, don't
 
 Launch all matching investigators in a single message so they run concurrently. Don't ask one agent to cover multiple MCPs.
 
+Read `~/.config/pstack/models.md` when present (written by `/setup-pstack`); a missing line falls back to the default here.
+
 Subagent config (each):
-- `subagent_type`: `generalPurpose`
-- `model`: your configured why-investigators model (default `grok-4.6-fast-xhigh`)
-- `readonly`: `false` (agent mode). **Do not use readonly/Ask mode.** It strips MCP access, which disables MCP-backed investigators entirely. Investigators still shouldn't write anything.
+- a general-purpose subagent
+- model: your configured why-investigators model (default Grok 4.6 Fast (xhigh reasoning))
+- full tool access, not read-only. **Do not spawn read-only investigators.** Some agents strip MCP access from read-only subagents, which disables MCP-backed investigators entirely. Investigators still shouldn't write anything.
 
 Each investigator gets:
 1. The base prompt from `references/investigator-prompt.md`
@@ -122,9 +124,9 @@ If your scope assessment suggests a single-commit trivial target where the PR de
 
 Spawn one synthesizer subagent:
 
-- `subagent_type`: `generalPurpose`
-- `model`: your configured why-synthesizer model (default `claude-fable-5-1-thinking-max`)
-- `readonly`: `false` (agent mode). The synthesizer's quality check spot-verifies citations, which can require MCP access. Readonly/Ask mode strips MCPs and defeats that.
+- a general-purpose subagent
+- model: your configured why-synthesizer model (default Claude Fable 5.1 (max reasoning))
+- full tool access, not read-only. The synthesizer's quality check spot-verifies citations, which can require MCP access. Some agents strip MCP access from read-only subagents, which defeats that.
 
 The synthesizer gets:
 1. The investigator findings, including any null results and any categories skipped with justification

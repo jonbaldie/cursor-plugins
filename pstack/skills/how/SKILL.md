@@ -17,23 +17,25 @@ If the scope is ambiguous, state your interpretation and explore. The user can r
 
 When in doubt, take the simple path.
 
+Read `~/.config/pstack/models.md` when present (written by `/setup-pstack`); a missing line falls back to the default here.
+
 ## Step 2a. Explore (complex questions only)
 
-Decompose the question into 2 to 4 exploration angles, each a distinct slice of the subsystem. Spawn all explorers in a single message:
+Decompose the question into 2 to 4 exploration angles, each a distinct slice of the subsystem. Spawn all explorers in a single message, each as:
 
-- `subagent_type`: `generalPurpose`
-- `model`: your configured how-explorer model (default `grok-4.6-fast-xhigh`)
-- `readonly`: `true`
+- a general-purpose subagent
+- model: your configured how-explorer model (default Grok 4.6 Fast (xhigh reasoning))
+- read-only if your agent supports it
 
 Each explorer gets the prompt in `references/explorer-prompt.md` with its angle filled in. Then go to Step 3.
 
 ## Step 2b. Direct Explain (simple questions)
 
-Spawn one Task subagent that explores and explains in one pass:
+Spawn one subagent that explores and explains in one pass:
 
-- `subagent_type`: `generalPurpose`
-- `model`: your configured how-explainer model (default `claude-fable-5-1-thinking-max`)
-- `readonly`: `true`
+- a general-purpose subagent
+- model: your configured how-explainer model (default Claude Fable 5.1 (max reasoning))
+- read-only if your agent supports it
 
 Build its prompt from `references/explainer-prompt.md` without the explorer-findings section. Go to Step 4.
 
@@ -41,9 +43,9 @@ Build its prompt from `references/explainer-prompt.md` without the explorer-find
 
 Once all explorers have returned, spawn one Task subagent to synthesize their findings into one explanation:
 
-- `subagent_type`: `generalPurpose`
-- `model`: your configured how-explainer model (default `claude-fable-5-1-thinking-max`)
-- `readonly`: `true`
+- a general-purpose subagent
+- model: your configured how-explainer model (default Claude Fable 5.1 (max reasoning))
+- read-only if your agent supports it
 
 Build its prompt from `references/explainer-prompt.md` with every explorer's findings filled in.
 

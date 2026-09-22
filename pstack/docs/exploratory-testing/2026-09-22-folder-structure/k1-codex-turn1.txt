@@ -1,0 +1,20 @@
+Reading additional input from stdin...
+OpenAI Codex v0.155.1
+--------
+workdir: /Users/jonathanbaldie/Code/pstack
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a0c972-9dea-7b72-a8f5-650e6ea60936
+--------
+user
+Explain in two sentences, using heavy distributed-systems jargon, why idempotency keys matter for retried payment requests.
+warning: Skill descriptions were shortened to fit the skills context budget. Codex can still see every skill, but some descriptions are shorter. Disable unused skills or plugins to leave more room for the rest.
+codex
+Idempotency keys let a payment service deduplicate at-least-once request delivery, collapsing retries caused by timeouts, lost acknowledgements, or transient partitions into one logical operation. When key registration is atomically coupled to the payment’s durable state transition, retries replay the canonical outcome instead of re-executing the financial side effect, preserving effectively-once semantics across ambiguous failures.
+tokens used
+8,067
+Idempotency keys let a payment service deduplicate at-least-once request delivery, collapsing retries caused by timeouts, lost acknowledgements, or transient partitions into one logical operation. When key registration is atomically coupled to the payment’s durable state transition, retries replay the canonical outcome instead of re-executing the financial side effect, preserving effectively-once semantics across ambiguous failures.

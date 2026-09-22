@@ -16,31 +16,33 @@ Invoke when the user says "reflect" or "/reflect". Skip when the conversation is
 
 ### 1. Locate the active transcript
 
-The parent finds its own transcript file before fanning out. The system prompt names the active workspace's `agent-transcripts/` directory. Use that path. Do not glob across `~/.cursor/projects/*/`. That crosses workspace boundaries and reads private chats from unrelated projects.
+The parent finds its own transcript file before fanning out. Use the active workspace's session transcripts, wherever your agent stores them (check the system prompt or the agent's docs; most write one JSONL file per session, one message per line). Do not glob across other workspaces' transcripts. That crosses workspace boundaries and reads private chats from unrelated projects.
 
 ```bash
-ls -t <agent-transcripts>/*.jsonl <agent-transcripts>/*/*.jsonl <agent-transcripts>/*/subagents/*.jsonl 2>/dev/null | head -10
+ls -t <transcripts-dir>/*.jsonl <transcripts-dir>/*/*.jsonl 2>/dev/null | head -10
 ```
 
-Three transcript layouts: legacy flat (`<id>.jsonl`), current nested (`<id>/<id>.jsonl`), and subagent (`<parent>/subagents/<child>.jsonl`).
+Layouts vary by agent: flat (`<id>.jsonl`), nested per session (`<id>/<id>.jsonl`), and sometimes separate subagent files under the parent session.
 
-For each candidate, read the first JSONL line and check that `message.content[0].text` contains the conversation's opening user prompt. Take the matching path. If no path resolves, write a tight digest of the session and pass that instead.
+For each candidate, read the first user message and check that it contains the conversation's opening user prompt. Take the matching path. If no path resolves, write a tight digest of the session and pass that instead.
 
 ### 2. Spawn three reviewers in parallel
 
-One message, three `Task` calls, `subagent_type: generalPurpose`, explicit `model:` on each, agent mode (`readonly: false`). Reviewers need MCP access for context lookups (tickets, chat threads, observability traces referenced in the transcript). Readonly strips MCPs.
+Read `~/.config/pstack/models.md` when present (written by `/setup-pstack`); a missing line falls back to the default here.
 
-| Lens | `model` | Prompt template |
+One message, three general-purpose subagent calls, explicit model on each, full tool access, not read-only. Reviewers need MCP access for context lookups (tickets, chat threads, observability traces referenced in the transcript). Some agents strip MCP access from read-only subagents.
+
+| Lens | Model | Prompt template |
 |---|---|---|
-| Judgment | your configured reflect-judgment model (default `claude-fable-5-1-thinking-max`) | `references/judgment-reviewer.md` |
-| Tooling | your configured reflect-tooling model (default `gpt-5.6-sol-max`) | `references/tooling-reviewer.md` |
-| Divergent | your configured reflect-judgment model (default `claude-fable-5-1-thinking-max`) | `references/divergent-reviewer.md` |
+| Judgment | your configured reflect-judgment model (default Claude Fable 5.1 (max reasoning)) | `references/judgment-reviewer.md` |
+| Tooling | your configured reflect-tooling model (default GPT-5.6 Sol (max reasoning)) | `references/tooling-reviewer.md` |
+| Divergent | your configured reflect-judgment model (default Claude Fable 5.1 (max reasoning)) | `references/divergent-reviewer.md` |
 
-Pass each template verbatim, substituting the transcript path or digest where marked. Reviewers return findings in the `Task` response body.
+Pass each template verbatim, substituting the transcript path or digest where marked. Reviewers return findings in the subagent response body.
 
 ### 3. Synthesize
 
-One `Task` call, `subagent_type: generalPurpose`, using your configured reflect-judgment model (default `claude-fable-5-1-thinking-max`), agent mode (`readonly: false`). The synthesizer's quality check includes spot-verifying citations, which can require MCP access. Readonly strips MCPs. Use `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. The synthesizer returns a structured Accepted / Rejected / Backlog list.
+One general-purpose subagent call, using your configured reflect-judgment model (default Claude Fable 5.1 (max reasoning)), full tool access, not read-only. The synthesizer's quality check includes spot-verifying citations, which can require MCP access. Some agents strip MCP access from read-only subagents. Use `references/synthesizer.md` verbatim, with each reviewer's full output inlined where marked. The synthesizer returns a structured Accepted / Rejected / Backlog list.
 
 ### 4. Structural enforcement check
 
@@ -55,9 +57,9 @@ Backlog items file to whatever devex / backlog tracker your team uses automatica
 For each approved Accepted item, follow the Routing field exactly:
 
 - Trivial existing-skill edit (a one-line bullet, a tightened sentence, a stale fact corrected): parent does directly.
-- Substantive existing-skill edit (a new section, a new pattern table, more than ~10 lines): hand to Cursor's built-in `create-skill` skill and run its draft / test / iterate loop.
-- `tune description: <skill path>` (the skill exists but didn't trigger when it should have): hand to `create-skill` and run its description-optimization loop.
-- `new skill via create-skill: <kebab-name>`: hand creation to `create-skill`. Do not invent the shape ad hoc.
+- Substantive existing-skill edit (a new section, a new pattern table, more than ~10 lines): hand to your agent's skill-authoring skill, if it has one, and run its draft / test / iterate loop.
+- `tune description: <skill path>` (the skill exists but didn't trigger when it should have): hand to the skill-authoring skill, if your agent has one, and run its description-optimization loop.
+- `new skill: <kebab-name>`: hand creation to the skill-authoring skill, if your agent has one. Do not invent the shape ad hoc.
 
 If your environment ships a SKILL.md validator, run it on every touched skill before declaring done. Skip this step if it doesn't.
 

@@ -22,9 +22,10 @@ prs=$(mktemp)
 gh pr list --author "@me" --state all --limit 1000 \
 	--json number,state,headRefName 2>/dev/null > "$prs" || echo "[]" > "$prs"
 
-# Transcripts dir: ~/.cursor/projects/<slugified-repo-path>/agent-transcripts.
-slug=$(printf '%s' "$main_wt" | sed 's#^/##; s#/#-#g')
-transcripts="$HOME/.cursor/projects/$slug/agent-transcripts"
+# Transcripts dir: the active workspace's session transcripts, wherever your
+# agent stores them. Unset means LAST_CHAT is "-" for every worktree.
+transcripts="${PSTACK_TRANSCRIPTS_DIR:-}"
+[ -z "$transcripts" ] && echo "warn: PSTACK_TRANSCRIPTS_DIR unset; LAST_CHAT column skipped" >&2
 now=$(date +%s)
 
 printf "SIZE\tAGE\tMERGED\tDIRTY\tREMOTE\tPR\tLAST_CHAT\tBUCKET\tWORKTREE\n"

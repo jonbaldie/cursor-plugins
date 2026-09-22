@@ -1,0 +1,18 @@
+OpenAI Codex v0.155.1
+--------
+workdir: /Users/jonathanbaldie/Code/pstack
+model: gpt-6-astra
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a0c972-9dea-7b72-a8f5-650e6ea60936
+--------
+user
+$bro
+codex
+If a payment request times out, retrying it with the same idempotency key tells the system it’s the same payment. The system can then return the original result without charging the customer twice.
+tokens used
+8,610
+If a payment request times out, retrying it with the same idempotency key tells the system it’s the same payment. The system can then return the original result without charging the customer twice.
